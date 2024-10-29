@@ -94,8 +94,9 @@
     "electron-builder": "^24.6.4"
   },
   "dependencies": {
-    "electron-store": "^8.1.0",
+    "axios": "^1.7.7",
     "electron-squirrel-startup": "^1.0.0",
+    "electron-store": "^8.1.0",
     "node-fetch": "^2.7.0"
   }
 }

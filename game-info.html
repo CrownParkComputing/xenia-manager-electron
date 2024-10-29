@@ -19,10 +19,12 @@
                 <div class="boxart-container">
                     <img id="gameBoxart" class="game-boxart" src="assets/default-cover.svg" alt="Game boxart">
                     <p>Boxart</p>
+                    <input type="text" id="boxartUrl" readonly class="artwork-url" aria-label="Boxart URL" title="Boxart URL">
                 </div>
                 <div class="icon-container">
                     <img id="gameIcon" class="game-icon" src="assets/default-cover.svg" alt="Game icon">
                     <p>Icon</p>
+                    <input type="text" id="iconUrl" readonly class="artwork-url" aria-label="Icon URL" title="Icon URL">
                 </div>
             </div>
 
@@ -42,13 +44,16 @@
                     <input type="text" id="gameTitle" aria-label="Game Title" title="Game Title">
                 </div>
 
-                <button id="changeLocation" class="action-button" aria-label="Change game location">Change Game Location</button>
-
-                <div id="xeniaVariants" class="variant-buttons">
-                    <button id="switchStable" class="variant-button" data-variant="stable" aria-label="Switch to Xenia Stable">Switch to Xenia Stable</button>
-                    <button id="switchCanary" class="variant-button" data-variant="canary" aria-label="Switch to Xenia Canary">Switch to Xenia Canary</button>
-                    <button id="switchNetplay" class="variant-button" data-variant="netplay" aria-label="Switch to Xenia Netplay">Switch to Xenia Netplay</button>
+                <div class="detail-row">
+                    <label for="xeniaVariant">Default Launcher:</label>
+                    <select id="xeniaVariant" class="variant-select" aria-label="Select default Xenia launcher">
+                        <option value="stable">Xenia Stable</option>
+                        <option value="canary">Xenia Canary</option>
+                        <option value="netplay">Xenia Netplay</option>
+                    </select>
                 </div>
+
+                <button id="changeLocation" class="action-button" aria-label="Change game location">Change Game Location</button>
             </div>
         </div>
     </div>

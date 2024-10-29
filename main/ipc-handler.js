@@ -29,7 +29,10 @@ class IPCHandler {
             return await fileHandler.selectDirectory(options);
         });
 
-        ipcMain.handle('select-game', async () => {
+        ipcMain.handle('select-game', async (event, options) => {
+            if (options && options.type === 'xbla') {
+                return await fileHandler.selectXBLAFolder();
+            }
             return await fileHandler.selectGame();
         });
 
@@ -42,8 +45,8 @@ class IPCHandler {
         logger.debug('Registering game handlers');
 
         // Game management
-        ipcMain.handle('add-game', async (event, filePath) => {
-            return await gameHandler.addGame(filePath);
+        ipcMain.handle('add-game', async (event, filePath, options) => {
+            return await gameHandler.addGame(filePath, options);
         });
 
         ipcMain.handle('remove-game', async (event, gameId) => {

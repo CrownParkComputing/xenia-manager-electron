@@ -3,6 +3,7 @@ import { launchGame, showGameContextMenu } from './game-operations.js';
 
 // Game Library State
 let games = [];
+let activeTab = 'retail'; // 'retail' or 'xbla'
 
 export async function showLibrary(contentDiv) {
     const settings = await window.electronAPI.getSettings();
@@ -11,6 +12,10 @@ export async function showLibrary(contentDiv) {
     contentDiv.innerHTML = `
         <div class="library-header">
             <h2>Game Library</h2>
+            <div class="library-tabs">
+                <button id="retail-tab" class="tab-button active">Retail Games</button>
+                <button id="xbla-tab" class="tab-button">Xbox Live Games</button>
+            </div>
             <button id="add-game" class="primary-button">Add Game</button>
         </div>
         <div class="games-grid" id="games-grid">
@@ -19,6 +24,10 @@ export async function showLibrary(contentDiv) {
                 ''}
         </div>
     `;
+
+    // Add event listeners for tabs
+    document.getElementById('retail-tab').addEventListener('click', () => switchTab('retail'));
+    document.getElementById('xbla-tab').addEventListener('click', () => switchTab('xbla'));
 
     // Add event listener for the Add Game button
     document.getElementById('add-game').addEventListener('click', addGame);
@@ -29,6 +38,23 @@ export async function showLibrary(contentDiv) {
     }
 }
 
+function switchTab(tab) {
+    activeTab = tab;
+    
+    // Update tab button styles
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+    });
+    document.getElementById(`${tab}-tab`).classList.add('active');
+
+    // Update add game button text
+    const addGameBtn = document.getElementById('add-game');
+    addGameBtn.textContent = activeTab === 'retail' ? 'Add Game' : 'Add XBLA Game';
+
+    // Reload games for the selected tab
+    loadGamesIntoUI();
+}
+
 async function addGame() {
     const settings = await window.electronAPI.getSettings();
     if (!settings.xeniaPath) {
@@ -36,18 +62,37 @@ async function addGame() {
         return;
     }
 
-    const filePaths = await window.electronAPI.selectGame();
-    if (!filePaths) return;
-
-    for (const filePath of filePaths) {
-        try {
-            const game = await window.electronAPI.addGame(filePath);
-            games.push(game);
-            await loadGamesIntoUI();
-            showStatusMessage(`Added ${game.title} successfully`, 'success');
-        } catch (error) {
-            showStatusMessage(`Error adding game: ${error.message}`, 'error');
+    try {
+        let filePaths;
+        if (activeTab === 'retail') {
+            // For retail games, select files with specific extensions
+            filePaths = await window.electronAPI.selectGame({
+                type: 'retail'
+            });
+        } else {
+            // For XBLA games, select a folder
+            filePaths = await window.electronAPI.selectGame({
+                type: 'xbla'
+            });
         }
+
+        if (!filePaths) return;
+
+        // Convert to array if single folder selected for XBLA
+        const paths = Array.isArray(filePaths) ? filePaths : [filePaths];
+
+        for (const filePath of paths) {
+            try {
+                const game = await window.electronAPI.addGame(filePath, { type: activeTab });
+                games.push(game);
+                await loadGamesIntoUI();
+                showStatusMessage(`Added ${game.title} successfully`, 'success');
+            } catch (error) {
+                showStatusMessage(`Error adding game: ${error.message}`, 'error');
+            }
+        }
+    } catch (error) {
+        showStatusMessage(`Error selecting game: ${error.message}`, 'error');
     }
 }
 
@@ -57,10 +102,20 @@ async function loadGamesIntoUI() {
     
     gamesGrid.innerHTML = '';
 
-    // Sort games by title
-    games.sort((a, b) => a.title.localeCompare(b.title));
+    // Filter games based on active tab
+    const filteredGames = games.filter(game => 
+        activeTab === 'retail' ? game.type !== 'XBLA' : game.type === 'XBLA'
+    );
 
-    for (const game of games) {
+    // Sort games by title
+    filteredGames.sort((a, b) => a.title.localeCompare(b.title));
+
+    if (filteredGames.length === 0) {
+        gamesGrid.innerHTML = `<p class="no-games">No ${activeTab === 'retail' ? 'retail' : 'Xbox Live'} games added.</p>`;
+        return;
+    }
+
+    for (const game of filteredGames) {
         const gameElement = createGameElement(game);
         gamesGrid.appendChild(gameElement);
         

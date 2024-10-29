@@ -23,6 +23,24 @@ class FileHandler {
         }
     }
 
+    async selectXBLAFolder() {
+        logger.debug('Handling select-xbla-folder request');
+        try {
+            const result = await dialog.showOpenDialog({
+                properties: ['openDirectory', 'createDirectory'],
+                title: 'Select XBLA Game Folder',
+                buttonLabel: 'Select Folder',
+                message: 'Select the folder containing your XBLA game'
+            });
+            
+            logger.debug('XBLA folder selection result:', result);
+            return result.canceled ? null : result.filePaths[0];
+        } catch (error) {
+            logger.error('Error in select-xbla-folder handler:', error);
+            throw error;
+        }
+    }
+
     async selectGameImage(type = 'boxart') {
         logger.debug(`Handling select-game-${type} request`);
         try {

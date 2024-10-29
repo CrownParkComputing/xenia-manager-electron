@@ -3,7 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 // Create a secure bridge between main and renderer processes
 contextBridge.exposeInMainWorld('electronAPI', {
     // Game Management
-    addGame: (filePath) => ipcRenderer.invoke('add-game', filePath),
+    addGame: (filePath, options) => ipcRenderer.invoke('add-game', filePath, options),
     removeGame: (gameId) => ipcRenderer.invoke('remove-game', gameId),
     getGames: () => ipcRenderer.invoke('get-games'),
     launchGame: (gameId, windowedMode) => ipcRenderer.invoke('launch-game', gameId, windowedMode),
@@ -26,7 +26,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getAvailableVariants: () => ipcRenderer.invoke('get-available-variants'),
     
     // File Selection
-    selectGame: () => ipcRenderer.invoke('select-game'),
+    selectGame: (options) => ipcRenderer.invoke('select-game', options),
     selectXenia: () => ipcRenderer.invoke('select-xenia'),
     selectDirectory: () => ipcRenderer.invoke('select-directory'),
     selectImage: () => ipcRenderer.invoke('select-image'),

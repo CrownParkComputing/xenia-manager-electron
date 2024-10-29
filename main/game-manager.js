@@ -23,7 +23,7 @@ class GameManager {
         });
     }
 
-    async addGame(filePath, variant) {
+    async addGame(filePath, variant, options = {}) {
         logger.info(`Adding new game from: ${filePath} using ${variant}`);
         
         try {
@@ -32,12 +32,13 @@ class GameManager {
                 throw new Error('Xenia path not configured');
             }
 
-            // Extract game information using the specified variant
-            const info = await gameInfo.extractGameInfo(filePath, variant);
+            // Extract game information using the specified variant and options
+            const info = await gameInfo.extractGameInfo(filePath, variant, options);
             const gameObject = gameInfo.createGameObject({
                 ...info,
                 path: filePath,
-                variant: variant // Ensure variant is included
+                variant: variant,
+                type: options.type === 'xbla' ? 'XBLA' : info.type // Override type if XBLA
             });
 
             // Add to store

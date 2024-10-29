@@ -4,15 +4,18 @@ const logger = require('../logger');
 const fileHandler = require('./file-handler');
 const { BrowserWindow } = require('electron');
 const path = require('path');
-const fs = require('fs').promises;
+const fs = require('fs');  // Regular fs for createWriteStream
+const fsPromises = require('fs').promises;  // Promises version for mkdir, etc.
+const axios = require('axios');
 
 class GameHandler {
     constructor() {
         this.gameInfoWindow = null;
+        this.artworkPath = path.join(process.cwd(), 'data', 'artwork');
     }
 
-    async addGame(filePath) {
-        logger.debug('Handling add-game request:', filePath);
+    async addGame(filePath, options = {}) {
+        logger.debug('Handling add-game request:', filePath, options);
         try {
             // First, prompt for Xenia variant selection
             const variant = await fileHandler.selectXeniaVariant();
@@ -21,11 +24,125 @@ class GameHandler {
             }
 
             logger.debug(`Selected Xenia variant: ${variant}`);
-            const result = await gameManager.addGame(filePath, variant);
+
+            let gamePath = filePath;
+            if (options.type === 'xbla') {
+                // For XBLA games, we need to find the executable in the folder
+                const files = await this.findXBLAExecutable(filePath);
+                if (!files || files.length === 0) {
+                    throw new Error('No valid XBLA executable found in the selected folder');
+                }
+                gamePath = files[0];
+                
+                // Get the game title from the folder name
+                const gameTitle = path.basename(filePath);
+                options.title = gameTitle;
+
+                // Rename the folder to match the title if needed
+                const parentDir = path.dirname(filePath);
+                const newPath = path.join(parentDir, gameTitle);
+                if (filePath !== newPath) {
+                    await fsPromises.rename(filePath, newPath);
+                }
+            }
+
+            const result = await gameManager.addGame(gamePath, variant, options);
+
+            // Download artwork after game is added
+            await this.downloadGameArtwork(result);
+
             logger.debug('Game added successfully');
             return result;
         } catch (error) {
             logger.error('Error in add-game handler:', error);
+            throw error;
+        }
+    }
+
+    async findXBLAExecutable(folderPath) {
+        const foundFiles = [];
+        
+        async function searchFolder(currentPath) {
+            const entries = await fsPromises.readdir(currentPath, { withFileTypes: true });
+            
+            for (const entry of entries) {
+                const fullPath = path.join(currentPath, entry.name);
+                
+                if (entry.isDirectory()) {
+                    await searchFolder(fullPath);
+                } else if (entry.isFile()) {
+                    // Check if file has no extension
+                    const ext = path.extname(entry.name);
+                    if (!ext) {
+                        foundFiles.push(fullPath);
+                    }
+                }
+            }
+        }
+
+        await searchFolder(folderPath);
+        return foundFiles;
+    }
+
+    async downloadGameArtwork(game) {
+        logger.info(`Downloading artwork for game ${game.gameId}`);
+        const gameArtworkPath = path.join(this.artworkPath, game.gameId);
+        
+        try {
+            // Create artwork directory if it doesn't exist
+            await fsPromises.mkdir(gameArtworkPath, { recursive: true });
+
+            // Download boxart using the game ID
+            if (game.gameId) {
+                const boxartUrl = `http://download.xbox.com/content/images/66acd000-77fe-1000-9115-d802${game.gameId}/1033/boxartlg.jpg`;
+                const boxartPath = path.join(gameArtworkPath, 'boxart.jpg');
+                await this.downloadFile(boxartUrl, boxartPath);
+                logger.info(`Downloaded boxart for game ${game.gameId}`);
+
+                // Update game with new boxart path
+                await store.updateGame(game.gameId, {
+                    ...game,
+                    coverPath: path.join('data', 'artwork', game.gameId, 'boxart.jpg')
+                });
+            }
+
+            // Download icon using the media ID if available
+            if (game.mediaId) {
+                const iconUrl = `http://download.xbox.com/content/images/${game.mediaId}/icon.png`;
+                const iconPath = path.join(gameArtworkPath, 'icon.png');
+                await this.downloadFile(iconUrl, iconPath);
+                logger.info(`Downloaded icon for game ${game.gameId}`);
+
+                // Update game with new icon path
+                await store.updateGame(game.gameId, {
+                    ...game,
+                    iconPath: path.join('data', 'artwork', game.gameId, 'icon.png')
+                });
+            }
+        } catch (error) {
+            logger.error(`Error downloading artwork for game ${game.gameId}: ${error.message}`);
+            // Don't throw error - just log it and continue
+            // This way the game is still added even if artwork download fails
+        }
+    }
+
+    async downloadFile(url, filePath) {
+        try {
+            const response = await axios({
+                method: 'GET',
+                url: url,
+                responseType: 'stream'
+            });
+
+            const writer = fs.createWriteStream(filePath);
+            response.data.pipe(writer);
+
+            return new Promise((resolve, reject) => {
+                writer.on('finish', resolve);
+                writer.on('error', reject);
+            });
+        } catch (error) {
+            logger.error(`Error downloading file from ${url}: ${error.message}`);
             throw error;
         }
     }
@@ -46,7 +163,7 @@ class GameHandler {
             const oldPath = type === 'boxart' ? game.coverPath : game.iconPath;
             if (oldPath && !oldPath.includes('default-cover') && !oldPath.includes('default-icon')) {
                 try {
-                    await fs.unlink(path.join(process.cwd(), oldPath));
+                    await fsPromises.unlink(path.join(process.cwd(), oldPath));
                 } catch (error) {
                     logger.warn(`Failed to remove old ${type}:`, error);
                 }
