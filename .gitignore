@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Runtime files
+cache/
+cache0/
+cache1/
+*.log
+*.cache
+*.cache.write
+
+# User data
+data/
+
+# Build output
+dist/
+out/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.*.local

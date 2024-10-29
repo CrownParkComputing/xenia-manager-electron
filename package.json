@@ -1,0 +1,101 @@
+{
+  "name": "electron-xenia-manager",
+  "version": "1.0.0",
+  "description": "Cross-platform Xenia emulator manager built with Electron",
+  "main": "main.js",
+  "homepage": "https://github.com/xenia-project/xenia",
+  "author": {
+    "name": "Xenia Manager Team",
+    "email": "contact@xeniamanager.org"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xenia-project/xenia"
+  },
+  "scripts": {
+    "start": "electron .",
+    "dev": "cross-env NODE_ENV=development electron .",
+    "build": "electron-builder build",
+    "build:win": "electron-builder build --win",
+    "build:linux": "electron-builder build --linux",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "build": {
+    "appId": "com.electron.xenia-manager",
+    "productName": "Xenia Manager",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "**/*",
+      "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+      "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+      "!**/node_modules/*.d.ts",
+      "!**/node_modules/.bin",
+      "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}",
+      "!.editorconfig",
+      "!**/._*",
+      "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}",
+      "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}",
+      "!**/{appveyor.yml,.travis.yml,circle.yml}",
+      "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb",
+        "rpm"
+      ],
+      "category": "Utility",
+      "maintainer": "Xenia Manager Team <contact@xeniamanager.org>",
+      "vendor": "Xenia Manager",
+      "synopsis": "Xbox 360 emulator manager",
+      "description": "A cross-platform manager for the Xenia Xbox 360 emulator",
+      "desktop": {
+        "Name": "Xenia Manager",
+        "Comment": "Xbox 360 emulator manager",
+        "Categories": "Utility;Game;Emulator",
+        "Terminal": false
+      },
+      "executableName": "xenia-manager",
+      "artifactName": "${productName}-${version}.${ext}"
+    },
+    "deb": {
+      "packageCategory": "utils",
+      "priority": "optional",
+      "afterInstall": "scripts/after-install.sh",
+      "fpm": [
+        "--depends=wine"
+      ]
+    },
+    "rpm": {
+      "packageCategory": "Applications/Emulators",
+      "afterInstall": "scripts/after-install.sh",
+      "fpm": [
+        "--depends=wine"
+      ]
+    }
+  },
+  "keywords": [
+    "xenia",
+    "emulator",
+    "xbox360",
+    "manager"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "electron": "^27.0.0",
+    "electron-builder": "^24.6.4"
+  },
+  "dependencies": {
+    "electron-store": "^8.1.0",
+    "electron-squirrel-startup": "^1.0.0",
+    "node-fetch": "^2.7.0"
+  }
+}

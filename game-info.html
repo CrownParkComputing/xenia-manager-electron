@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Info</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="game-info.css">
+</head>
+<body class="game-info">
+    <div class="window-frame">
+        <div class="title-bar">
+            <h1>Game Details</h1>
+            <button id="closeBtn" class="close-button" aria-label="Close window">✕</button>
+        </div>
+        
+        <div class="content">
+            <div class="game-visuals">
+                <div class="boxart-container">
+                    <img id="gameBoxart" class="game-boxart" src="assets/default-cover.svg" alt="Game boxart">
+                    <p>Boxart</p>
+                </div>
+                <div class="icon-container">
+                    <img id="gameIcon" class="game-icon" src="assets/default-cover.svg" alt="Game icon">
+                    <p>Icon</p>
+                </div>
+            </div>
+
+            <div class="game-details">
+                <div class="detail-row">
+                    <label for="gameId">Game ID:</label>
+                    <input type="text" id="gameId" readonly aria-label="Game ID" title="Game ID">
+                </div>
+                
+                <div class="detail-row">
+                    <label for="mediaId">Media ID:</label>
+                    <input type="text" id="mediaId" readonly aria-label="Media ID" title="Media ID">
+                </div>
+                
+                <div class="detail-row">
+                    <label for="gameTitle">Game Title:</label>
+                    <input type="text" id="gameTitle" aria-label="Game Title" title="Game Title">
+                </div>
+
+                <button id="changeLocation" class="action-button" aria-label="Change game location">Change Game Location</button>
+
+                <div id="xeniaVariants" class="variant-buttons">
+                    <button id="switchStable" class="variant-button" data-variant="stable" aria-label="Switch to Xenia Stable">Switch to Xenia Stable</button>
+                    <button id="switchCanary" class="variant-button" data-variant="canary" aria-label="Switch to Xenia Canary">Switch to Xenia Canary</button>
+                    <button id="switchNetplay" class="variant-button" data-variant="netplay" aria-label="Switch to Xenia Netplay">Switch to Xenia Netplay</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="modules/game-info-ui.js"></script>
+</body>
+</html>

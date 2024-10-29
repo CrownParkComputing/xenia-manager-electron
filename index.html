@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'">
+    <title>Xenia Manager</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="nav-menu">
+        <a href="#" id="library">Library</a>
+        <a href="#" id="settings">Settings</a>
+        <a href="#" id="xenia-settings">Xenia Settings</a>
+    </div>
+    
+    <div class="main-content">
+        <div class="header">
+            <h1>Xenia Manager</h1>
+        </div>
+        
+        <div class="content">
+            <div id="welcome-message">
+                <h2>Welcome to Xenia Manager</h2>
+                <p>Manage your Xbox 360 games and Xenia emulator settings with ease.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading overlay -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+        <div class="loading-message">Loading...</div>
+    </div>
+
+    <!-- Status message container -->
+    <div id="status-message" class="status-message" style="display: none;"></div>
+
+    <!-- Modal container -->
+    <div id="modal-container"></div>
+
+    <!-- Load renderer script as module -->
+    <script src="renderer.js" type="module"></script>
+</body>
+</html>
