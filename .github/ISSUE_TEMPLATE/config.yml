@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Original Xenia Manager Repository
+    url: https://github.com/xenia-manager/xenia-manager
+    about: Check the original Xenia Manager repository for reference
+  - name: Xenia Project
+    url: https://github.com/xenia-project/xenia
+    about: Visit the main Xenia emulator repository
+  - name: Discussions
+    url: https://github.com/yourusername/electron-xenia-manager/discussions
+    about: Please ask and answer questions here
